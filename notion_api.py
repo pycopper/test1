@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-# 環境変数からNotion APIの情報を取得
+# 環境変数からNotion API情報を取得
 NOTION_API_KEY = os.getenv("NOTION_API_KEY")
 NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
 
@@ -14,6 +14,12 @@ HEADERS = {
     "Notion-Version": "2022-06-28",
 }
 
+# ルートエンドポイント（動作確認用）
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "Notion API is running!"})
+
+# Notionにタスクを追加
 @app.route("/add_task", methods=["POST"])
 def add_task():
     data = request.json
