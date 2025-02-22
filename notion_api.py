@@ -14,24 +14,28 @@ HEADERS = {
     "Notion-Version": "2022-06-28",
 }
 
-# ルートエンドポイント（動作確認用）
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"message": "Notion API is running!"})
-
-# Notionにタスクを追加
 @app.route("/add_task", methods=["POST"])
 def add_task():
     data = request.json
+
+    # **受け取るJSONデータのキーを適切に変更**
+    task_name = data.get("task_name")  # Postmanから "task_name" で送信
+    tag_name = data.get("tag")  # "タグ" に対応する値
+
+    # **Notionのプロパティ名を適切に変更**
     notion_payload = {
         "parent": {"database_id": NOTION_DATABASE_ID},
         "properties": {
-            "Name": {"title": [{"text": {"content": data["task_name"]}}]},
-            "Status": {"select": {"name": data.get("status", "To Do")}}
+            "名前": {"title": [{"text": {"content": task_name}}]},  # 日本語カラム
+            "タグ": {"select": {"name": tag_name}} if tag_name else None
         }
     }
 
+    # **"タグ" が None なら削除**
+    notion_payload["properties"] = {k: v for k, v in notion_payload["properties"].items() if v is not None}
+
     response = requests.post("https://api.notion.com/v1/pages", headers=HEADERS, json=notion_payload)
+    
     return jsonify(response.json())
 
 if __name__ == "__main__":
